@@ -7,7 +7,7 @@ public class GameManager : MonoBehaviour
     public static GameManager instance;
 
     [SerializeField]
-    GameObject player;
+    PlayerScript player;
 
     private void Awake()
     {
@@ -30,17 +30,21 @@ public class GameManager : MonoBehaviour
 
     public void MoveForward()
     {
-        player.GetComponent<PlayerScript>().MoveForward();
+        Debug.Log(player.objectFacing.name);
+        if (player.objectFacing.GetComponent<BlockScript>().hasPassed)
+            return;
+
+        player.MoveForward();
     }
 
     public void TurnLeft()
     {
-        player.GetComponent<PlayerScript>().TurnLeft();
+        player.TurnLeft();
     }
 
     public void TurnRight()
     {
-        player.GetComponent<PlayerScript>().TurnRight();
+        player.TurnRight();
     }
 
     public void TurnDown()

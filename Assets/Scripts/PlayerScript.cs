@@ -8,17 +8,19 @@ public class PlayerScript : MonoBehaviour
     float movementTime = 2f;
     [SerializeField]
     bool isMoving = false;
+    bool isUnderwater = false;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public GameObject objectFacing;
 
-    // Update is called once per frame
-    void Update()
+    Vector3 lastRotation;
+
+    private void Update()
     {
-        
+        Vector3 forward = transform.TransformDirection(Vector3.forward);
+
+        RaycastHit raycastHit;
+        if (Physics.Raycast(transform.position, forward, out raycastHit, 50))
+            objectFacing = raycastHit.transform.gameObject;
     }
 
     public IEnumerator Turn(Vector3 angle)
@@ -27,6 +29,8 @@ public class PlayerScript : MonoBehaviour
 
         Vector3 currentRotation = transform.eulerAngles;
         Vector3 finalRotation = currentRotation + angle;
+
+        lastRotation = angle;
 
         float timer = 0f;
 
@@ -40,6 +44,9 @@ public class PlayerScript : MonoBehaviour
             yield return null;
         }
         isMoving = false;
+
+        if (objectFacing.GetComponent<BlockScript>().hasPassed)
+            StartCoroutine(Turn(lastRotation));
     }
 
     public void TurnLeft()
@@ -99,5 +106,31 @@ public class PlayerScript : MonoBehaviour
         }
 
         isMoving = false;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.tag == "Underwater Block")
+        {
+            if(!isUnderwater)
+                isUnderwater = true;
+        }
+        else if(other.tag == "Block")
+        {
+            if(isUnderwater)
+                isUnderwater = false;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.GetComponent<BlockScript>() != null)
+        {
+            if (!other.GetComponent<BlockScript>().hasPassed)
+            {
+                other.GetComponent<BlockScript>().hasPassed = true;
+                other.transform.Find("Can't Go Back").gameObject.SetActive(true);
+            }
+        }
     }
 }
