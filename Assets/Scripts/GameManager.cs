@@ -22,43 +22,72 @@ public class GameManager : MonoBehaviour
         {
             instance = this;
         }
+        TextLevelLoader.instance.LoadLevel("Level 2");
+        player.Initialize();
     }
 
     public float blockSize;
 
     private void Start()
     {
-        TextLevelLoader.instance.LoadLevel("Level 1");
-        player.Initialize();
     }
 
     public void MoveForward()
     {
-        Debug.Log(player.objectFacing.name);
+        player.UpdateBlocks();
         if (player.objectFacing.GetComponent<BlockScript>().hasPassed)
+        {
+            CameraShake();
             return;
+        }
 
         player.MoveForward();
     }
 
     public void TurnLeft()
     {
+        player.UpdateBlocks();
+        if (player.IsInElbow(Vector3.left) || player.IsInTightSpace())
+        { 
+            CameraShake();
+            return;
+        }
         player.TurnLeft();
     }
 
     public void TurnRight()
     {
+        player.UpdateBlocks();
+        if (player.IsInElbow(Vector3.right) || player.IsInTightSpace())
+        {
+            CameraShake();
+            return;
+        }
         player.TurnRight();
     }
 
     public void TurnDown()
     {
-        player.GetComponent<PlayerScript>().TurnDown();
+        player.UpdateBlocks();
+        if (!player.isUnderwater)
+        {
+            CameraShake();
+            return;
+        }
+        else
+            player.TurnDown();
     }
 
     public void TurnUp()
     {
-        player.GetComponent<PlayerScript>().TurnUp();
+        player.UpdateBlocks();
+        if (!player.isUnderwater)
+        {
+            CameraShake();
+            return;
+        }
+        else
+            player.TurnUp();
     }
 
     public void CameraShake()

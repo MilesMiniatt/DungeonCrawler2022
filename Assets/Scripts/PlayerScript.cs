@@ -8,7 +8,7 @@ public class PlayerScript : MonoBehaviour
     float movementTime = 2f;
     [SerializeField]
     bool isMoving = false;
-    bool isUnderwater = false;
+    public bool isUnderwater = false;
 
     public GameObject objectFacing;
 
@@ -26,25 +26,25 @@ public class PlayerScript : MonoBehaviour
 
     private void Update()
     {
-        Vector3 forward = transform.TransformDirection(Vector3.forward);
+        //Vector3 forward = transform.TransformDirection(Vector3.forward);
 
-        RaycastHit raycastHit;
-        if (Physics.Raycast(transform.position, forward, out raycastHit, 50))
-            objectFacing = raycastHit.transform.gameObject;
+        //RaycastHit raycastHit;
+        //if (Physics.Raycast(transform.position, forward, out raycastHit, 50))
+        //    objectFacing = raycastHit.transform.gameObject;
     }
 
-    void UpdateBlocks()
+    public void UpdateBlocks()
     {
         Vector3 forward = transform.TransformDirection(Vector3.forward);
         Vector3 left = transform.TransformDirection(Vector3.left); 
         Vector3 right = transform.TransformDirection(Vector3.right);
         Vector3 back = transform.TransformDirection(Vector3.back);
 
-
         RaycastHit raycastHit;
         if (Physics.Raycast(transform.position, forward, out raycastHit, 10))
         {
             frontBlock = raycastHit.transform.gameObject;
+            objectFacing = frontBlock;
         }
         if (Physics.Raycast(transform.position, left, out raycastHit, 10)) {
 
@@ -61,52 +61,49 @@ public class PlayerScript : MonoBehaviour
 
     }
 
+    public bool IsInTightSpace()
+    {
+        return !frontBlock.GetComponent<BlockScript>().hasPassed &&
+            rightBlock.GetComponent<BlockScript>().hasPassed &&
+            leftBlock.GetComponent<BlockScript>().hasPassed &&
+            backBlock.GetComponent<BlockScript>().hasPassed;
+    }
+
+    public bool IsInElbow(Vector3 angle)
+    {
+        return (leftBlock.GetComponent<BlockScript>().hasPassed == true &&
+            angle == Vector3.left ||
+            rightBlock.GetComponent<BlockScript>().hasPassed == true &&
+            angle == Vector3.right) &&
+            backBlock.GetComponent<BlockScript>().hasPassed == true;
+    }
+
     public IEnumerator Turn(Vector3 angle)
     {
         if (isMoving) yield return null;
 
-       
-        if (!frontBlock.GetComponent<BlockScript>().hasPassed &&
-            rightBlock.GetComponent<BlockScript>().hasPassed &&
-            leftBlock.GetComponent<BlockScript>().hasPassed &&
-            backBlock.GetComponent<BlockScript>().hasPassed)
+        Vector3 currentRotation = transform.eulerAngles;
+        Vector3 finalRotation = currentRotation + angle;
+
+        lastRotation = angle;
+
+        float timer = 0f;
+
+
+        isMoving = true;
+        while (timer < movementTime)
         {
-            GameManager.instance.CameraShake();
+            timer += Time.deltaTime;
+            transform.eulerAngles = Vector3.Lerp(currentRotation, finalRotation, timer / movementTime);
             yield return null;
         }
-        else if ((leftBlock.GetComponent<BlockScript>().hasPassed == true &&
-            angle == new Vector3(0, -90, 0) ||
-            rightBlock.GetComponent<BlockScript>().hasPassed == true &&
-            angle == new Vector3(0, 90, 0)) &&
-            backBlock.GetComponent<BlockScript>().hasPassed == true)
-        {
-            GameManager.instance.CameraShake();
-            yield return null;
-        }
-        else
-        {
-            Vector3 currentRotation = transform.eulerAngles;
-            Vector3 finalRotation = currentRotation + angle;
+        isMoving = false;
 
-            lastRotation = angle;
+        UpdateBlocks();
 
-            float timer = 0f;
-
-
-            isMoving = true;
-            while (timer < movementTime)
-            {
-                timer += Time.deltaTime;
-                transform.eulerAngles = Vector3.Lerp(currentRotation, finalRotation, timer / movementTime);
-                yield return null;
-            }
-            isMoving = false;
-
-            UpdateBlocks();
-
-            if (frontBlock.GetComponent<BlockScript>().hasPassed)
-                StartCoroutine(Turn(lastRotation));
-        }
+        if (frontBlock.GetComponent<BlockScript>().hasPassed)
+            StartCoroutine(Turn(lastRotation));
+        
     }
 
     public void TurnLeft()
