@@ -7,11 +7,12 @@ TagManager:
   - Underwater Block
   - Block
   - Wall Block
+  - Map
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Map
   - Water
   - UI
   - 
