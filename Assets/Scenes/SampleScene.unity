@@ -135,6 +135,7 @@ GameObject:
   - component: {fileID: 142944014}
   - component: {fileID: 142944016}
   - component: {fileID: 142944015}
+  - component: {fileID: 142944017}
   m_Layer: 0
   m_Name: Camera
   m_TagString: Untagged
@@ -207,6 +208,25 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!95 &142944017
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 142944013}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 07bed87fb1a321646845d0de272cb000, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1001 &644607944
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -593,6 +613,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 1854712933}
+  cameraAnimator: {fileID: 142944017}
   blockSize: 1
 --- !u!4 &1407828279
 Transform:
@@ -735,6 +756,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9c4601b15764b749ad054e5d90476c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movementTime: 2
+  movementTime: 1
   isMoving: 0
   objectFacing: {fileID: 0}
+  leftBlock: {fileID: 0}
+  rightBlock: {fileID: 0}
+  backBlock: {fileID: 0}
+  frontBlock: {fileID: 0}

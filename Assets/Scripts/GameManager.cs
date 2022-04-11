@@ -9,6 +9,9 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     PlayerScript player;
 
+    [SerializeField]
+    Animator cameraAnimator;
+
     private void Awake()
     {
         if (instance != null)
@@ -26,6 +29,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         TextLevelLoader.instance.LoadLevel("Level 1");
+        player.Initialize();
     }
 
     public void MoveForward()
@@ -55,5 +59,10 @@ public class GameManager : MonoBehaviour
     public void TurnUp()
     {
         player.GetComponent<PlayerScript>().TurnUp();
+    }
+
+    public void CameraShake()
+    {
+        cameraAnimator.SetTrigger("Shake");
     }
 }

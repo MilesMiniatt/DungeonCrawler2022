@@ -12,7 +12,17 @@ public class PlayerScript : MonoBehaviour
 
     public GameObject objectFacing;
 
+    [SerializeField]
+    public GameObject leftBlock, rightBlock, backBlock, frontBlock;
+
+    GameObject cantGoBack;
+    
     Vector3 lastRotation;
+
+    public void Initialize()
+    {
+        UpdateBlocks();
+    }
 
     private void Update()
     {
@@ -23,30 +33,80 @@ public class PlayerScript : MonoBehaviour
             objectFacing = raycastHit.transform.gameObject;
     }
 
+    void UpdateBlocks()
+    {
+        Vector3 forward = transform.TransformDirection(Vector3.forward);
+        Vector3 left = transform.TransformDirection(Vector3.left); 
+        Vector3 right = transform.TransformDirection(Vector3.right);
+        Vector3 back = transform.TransformDirection(Vector3.back);
+
+
+        RaycastHit raycastHit;
+        if (Physics.Raycast(transform.position, forward, out raycastHit, 10))
+        {
+            frontBlock = raycastHit.transform.gameObject;
+        }
+        if (Physics.Raycast(transform.position, left, out raycastHit, 10)) {
+
+            leftBlock = raycastHit.transform.gameObject;
+        }
+        if (Physics.Raycast(transform.position, right, out raycastHit, 10))
+        {
+            rightBlock = raycastHit.transform.gameObject;
+        }
+        if (Physics.Raycast(transform.position, back, out raycastHit, 10))
+        {
+            backBlock = raycastHit.transform.gameObject;
+        }
+
+    }
+
     public IEnumerator Turn(Vector3 angle)
     {
         if (isMoving) yield return null;
 
-        Vector3 currentRotation = transform.eulerAngles;
-        Vector3 finalRotation = currentRotation + angle;
-
-        lastRotation = angle;
-
-        float timer = 0f;
-
-        Debug.Log("Turning by " + angle);
-
-        isMoving = true;
-        while (timer < movementTime)
+       
+        if (!frontBlock.GetComponent<BlockScript>().hasPassed &&
+            rightBlock.GetComponent<BlockScript>().hasPassed &&
+            leftBlock.GetComponent<BlockScript>().hasPassed &&
+            backBlock.GetComponent<BlockScript>().hasPassed)
         {
-            timer += Time.deltaTime;
-            transform.eulerAngles = Vector3.Lerp(currentRotation, finalRotation, timer / movementTime);
+            GameManager.instance.CameraShake();
             yield return null;
         }
-        isMoving = false;
+        else if ((leftBlock.GetComponent<BlockScript>().hasPassed == true &&
+            angle == new Vector3(0, -90, 0) ||
+            rightBlock.GetComponent<BlockScript>().hasPassed == true &&
+            angle == new Vector3(0, 90, 0)) &&
+            backBlock.GetComponent<BlockScript>().hasPassed == true)
+        {
+            GameManager.instance.CameraShake();
+            yield return null;
+        }
+        else
+        {
+            Vector3 currentRotation = transform.eulerAngles;
+            Vector3 finalRotation = currentRotation + angle;
 
-        if (objectFacing.GetComponent<BlockScript>().hasPassed)
-            StartCoroutine(Turn(lastRotation));
+            lastRotation = angle;
+
+            float timer = 0f;
+
+
+            isMoving = true;
+            while (timer < movementTime)
+            {
+                timer += Time.deltaTime;
+                transform.eulerAngles = Vector3.Lerp(currentRotation, finalRotation, timer / movementTime);
+                yield return null;
+            }
+            isMoving = false;
+
+            UpdateBlocks();
+
+            if (frontBlock.GetComponent<BlockScript>().hasPassed)
+                StartCoroutine(Turn(lastRotation));
+        }
     }
 
     public void TurnLeft()
@@ -88,10 +148,16 @@ public class PlayerScript : MonoBehaviour
         if (isMoving) return;
 
         StartCoroutine(Move());
+
+        UpdateBlocks();
     }
 
     public IEnumerator Move()
     {
+        if(cantGoBack != null)
+        {
+            cantGoBack.transform.Find("Can't Go Back").gameObject.SetActive(false);
+        }
         Vector3 playerPosition = transform.position;
         Vector3 targetPosition = playerPosition + transform.forward * GameManager.instance.blockSize;
 
@@ -106,6 +172,13 @@ public class PlayerScript : MonoBehaviour
         }
 
         isMoving = false;
+        UpdateBlocks();
+
+        if (backBlock != null && backBlock.transform.Find("Can't Go Back") != null)
+        {
+            cantGoBack = backBlock;
+            cantGoBack.transform.Find("Can't Go Back").gameObject.SetActive(true);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -129,7 +202,6 @@ public class PlayerScript : MonoBehaviour
             if (!other.GetComponent<BlockScript>().hasPassed)
             {
                 other.GetComponent<BlockScript>().hasPassed = true;
-                other.transform.Find("Can't Go Back").gameObject.SetActive(true);
             }
         }
     }

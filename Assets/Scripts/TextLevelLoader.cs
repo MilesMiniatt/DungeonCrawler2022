@@ -59,6 +59,7 @@ public class TextLevelLoader : MonoBehaviour
             //file reader will read meta files as well. We only need the text files so we apply this check
             if (fileExtension == ".txt")
             {
+                Debug.Log("Loading file " + levelFile.Name);
                 //YSlice object to keep editor clean. We parent each Y Slice to the map object
                 GameObject YSlice = new GameObject();
                 YSlice.transform.name = "YSlice " + currentBlockY;
