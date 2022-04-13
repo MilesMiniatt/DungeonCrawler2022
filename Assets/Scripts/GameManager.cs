@@ -10,7 +10,21 @@ public class GameManager : MonoBehaviour
     PlayerScript player;
 
     [SerializeField]
+    EnemyScript enemy;
+
+    [SerializeField]
     Animator cameraAnimator;
+
+    public GameObject spawnPoint;
+
+    [SerializeField]
+    int stepsBeforeAIMoves = 5;
+
+    [SerializeField]
+    int currentStepsTaken = 0;
+
+    [SerializeField]
+    List<Vector3> playerStepPositions = new List<Vector3>();
 
     private void Awake()
     {
@@ -23,13 +37,25 @@ public class GameManager : MonoBehaviour
             instance = this;
         }
         TextLevelLoader.instance.LoadLevel("Level 2");
+        spawnPoint = GameObject.FindGameObjectWithTag("SpawnPoint");
         player.Initialize();
+        enemy.Initialize();
     }
 
     public float blockSize;
 
     private void Start()
     {
+    }
+
+    void MoveEnemy()
+    {
+        if (playerStepPositions.Count <= 0) return;
+
+        if (currentStepsTaken <= stepsBeforeAIMoves) return;
+
+        enemy.transform.position = playerStepPositions[0];
+        playerStepPositions.RemoveAt(0);
     }
 
     public void MoveForward()
@@ -40,8 +66,12 @@ public class GameManager : MonoBehaviour
             CameraShake();
             return;
         }
+        else if (player.isMoving) return;
 
+        playerStepPositions.Add(player.transform.position);
+        currentStepsTaken++;
         player.MoveForward();
+        MoveEnemy();
     }
 
     public void TurnLeft()

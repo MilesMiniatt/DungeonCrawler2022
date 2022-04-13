@@ -7,7 +7,7 @@ public class PlayerScript : MonoBehaviour
     [SerializeField]
     float movementTime = 2f;
     [SerializeField]
-    bool isMoving = false;
+    public bool isMoving = false;
     public bool isUnderwater = false;
 
     public GameObject objectFacing;
@@ -21,6 +21,7 @@ public class PlayerScript : MonoBehaviour
 
     public void Initialize()
     {
+        transform.position = GameManager.instance.spawnPoint.transform.position;
         UpdateBlocks();
     }
 
